@@ -15,6 +15,7 @@
   become: true
   apt_key:
     url: 'https://download.docker.com/linux/ubuntu/gpg'
+    keyring: /etc/apt/trusted.gpg.d/docker.gpg
 
 - name: Add docker apt repo
   become: true
