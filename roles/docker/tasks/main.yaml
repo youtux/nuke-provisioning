@@ -1,0 +1,70 @@
+- name: Install apt packages
+  become: true
+  apt:
+    update_cache: true
+    state: latest
+    name:
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+
+# Docker installation mostly cribbed from:
+# https://withblue.ink/2019/07/13/yes-you-can-run-docker-on-raspbian.html
+- name: Add docker GPG key
+  become: true
+  debugger: always
+  apt_key:
+    url: 'https://download.docker.com/linux/ubuntu/gpg'
+
+- name: Add docker apt repo
+  become: true
+  apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable"
+
+- name: install docker-ce
+  become: true
+  apt:
+    install_recommends: false
+    update_cache: true
+    state: latest
+    name:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+
+# - name: copy /etc/docker/daemon.json
+#   become: true
+#   copy:
+#     src: daemon.json
+#     dest: /etc/docker/daemon.json
+#     mode: '0644'
+#     backup: true
+#   # have to restart docker to notify this file has changed. SIGHUP not good enough
+#   notify: ['restart docker']
+
+- name: add user to group docker
+  become: true
+  user:
+    name: "{{ user }}"
+    groups:
+    - docker
+    append: true
+
+# https://stackoverflow.com/questions/26677064/create-and-use-group-without-restart
+# https://docs.ansible.com/ansible/latest/modules/meta_module.html
+# reset_connection (added in Ansible 2.3) interrupts a persistent connection (i.e. ssh + control persist)
+- name: reset ssh connection to allow user changes to affect 'current login user'
+  meta: reset_connection
+  # when: 'add_docker_group.changed'
+  # Had to remove the above because of:
+  # [WARNING]: reset_connection task does not support when conditional
+
+- name: enable & start docker service
+  become: true
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+    daemon_reload: true
