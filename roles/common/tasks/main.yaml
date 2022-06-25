@@ -1,4 +1,4 @@
-- name: install apt packages
+- name: Install apt packages
   become: true
   apt:
     update_cache: true
@@ -9,6 +9,12 @@
     - jq
     - htop
     - iperf3
+
+- name: Install Snap packages
+  become: true
+  snap:
+    name: starship
+    classic: yes
 
 - name: Use zsh shell
   become: true
@@ -25,6 +31,12 @@
   shell:
     cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
   when: oh_my_zsh_dir.stat.exists == 0
+
+- name: Ensure starship is in .zshrc
+  blockinfile:
+    path: ~/.zshrc
+    block: |
+      eval "$(starship init zsh)"
 
 - name: Update apt packages to the latest version
   become: true
