@@ -13,7 +13,6 @@
 # https://withblue.ink/2019/07/13/yes-you-can-run-docker-on-raspbian.html
 - name: Add docker GPG key
   become: true
-  debugger: always
   apt_key:
     url: 'https://download.docker.com/linux/ubuntu/gpg'
 
