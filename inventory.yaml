@@ -1,4 +1,0 @@
-all:
-  hosts:
-    # nuke.local:  # not using this yet
-    "192.168.1.111":  # Using a test vm instead
